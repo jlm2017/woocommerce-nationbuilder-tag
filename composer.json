@@ -1,5 +1,5 @@
 {
-  "name": "jlm2017/woocommerce-name-your-price",
+  "name": "jlm2017/woocommerce-order-notify",
   "type": "wordpress-plugin",
   "require": {
     "php": ">=5.3.2",
