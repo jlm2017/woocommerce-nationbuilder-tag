@@ -7,14 +7,14 @@ License: GPL2
 */
 
 /**
- * Class WC_Post_Order_Plugin.
+ * Class WC_Hooks_Custom_Plugin.
  *
  * @author    S.Z. <s****.z****@gmail.com>
  */
 class WC_Hooks_Custom_Plugin
 {
     /**
-     * WC_Post_Order_Plugin constructor.
+     * Constructor.
      */
     public function __construct()
     {
