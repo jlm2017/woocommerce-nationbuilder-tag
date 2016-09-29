@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: WooCommerce Hooks Custom
-Description: Manage post order event
-Author: Sohel Zerdoumi
-License: GPL2
+    Plugin Name: WooCommerce Order Notify
+    Description: Notify custom app on event.
+    Author: Sohel Zerdoumi
+    License: GPL2
 */
 
 /**
@@ -80,7 +80,6 @@ class WC_Order_Notify_Plugin
 
         $this->on_order_status_change($order_id, $_POST['order_status']);
     }
-
 }
 
 new WC_Order_Notify_Plugin();
