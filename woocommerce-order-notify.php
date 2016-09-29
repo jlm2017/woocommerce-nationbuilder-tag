@@ -7,11 +7,11 @@ License: GPL2
 */
 
 /**
- * Class WC_Hooks_Custom_Plugin.
+ * Class WC_Order_Notify_Plugin.
  *
  * @author    Sohel Zerdoumi <sohel.zerdoumi@gmail.com>
  */
-class WC_Hooks_Custom_Plugin
+class WC_Order_Notify_Plugin
 {
     /**
      * Constructor.
@@ -83,4 +83,4 @@ class WC_Hooks_Custom_Plugin
 
 }
 
-new WC_Hooks_Custom_Plugin();
+new WC_Order_Notify_Plugin();
