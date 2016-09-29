@@ -55,10 +55,6 @@ class WC_Hooks_Custom_Plugin
                 $this->on_completed($order);
                 break;
         }
-
-        if (0 === strcmp('wc-completed', $status)) {
-            $order = wc_get_order($id);
-        }
     }
 
     /**
