@@ -47,8 +47,6 @@ class WC_Hooks_Custom_Plugin
      */
     function on_order_status_change($id, $status)
     {
-        global $wpdb;
-
         switch ($status) {
             case 'wc-completed':
                 $order = wc_get_order($id);
@@ -70,8 +68,6 @@ class WC_Hooks_Custom_Plugin
      */
     function on_order_update($order_id, $post)
     {
-        global $wpdb;
-
         // The new value is inside this parameter and not in WP_Post
         if (!isset($_POST['order_status'])) {
             return;
