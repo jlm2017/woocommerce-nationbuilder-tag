@@ -18,8 +18,12 @@ class WC_Order_Notify_Plugin
      */
     public function __construct()
     {
+        // error_log("toto");
         // When status changed
-        add_action('woocommerce_order_edit_status', [$this, 'on_order_status_change'], 10, 2);
+        // add_action('woocommerce_order_edit_status', [$this, 'on_order_status_change'], 10, 2);
+
+        // When status got completed
+        add_action('woocommerce_order_status_completed', [$this, 'on_completed'], 10, 2);
 
         // When any data are updated
         add_action('woocommerce_process_shop_order_meta', [$this, 'on_order_update'], 10, 2);
@@ -131,9 +135,15 @@ class WC_Order_Notify_Plugin
      *
      * @return void
      */
-    public function on_completed($order)
+    public function on_completed($order_id)
     {
         // @Todo call api
+        $options = get_option('woocommerce_order_notify_settings');
+
+        error_log("voici la commande détectée d'id: " . $order_id ."\n");
+        $order = wc_get_order($order_id);
+        // $person = plp.nationbuilder.com/api/v1/people/match?email=simon.florian.toulouse%40gmail.com&__proto__=&access_token=e2e9cdeb3f70012949c6e90dc69b028d739846f8dad45ceee44e4e78d22c0533
+        error_log($options['woocommerce_order_notify_nation_slug'] . ".nationbuilder.com/api/v1/people/match?email=" . $order->billing_email . "&__proto__=&access_token=" . $options['woocommerce_order_notify_api_key']);
     }
 
     /**
