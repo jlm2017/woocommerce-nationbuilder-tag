@@ -18,10 +18,6 @@ class WC_Order_Notify_Plugin
      */
     public function __construct()
     {
-        // error_log("toto");
-        // When status changed
-        // add_action('woocommerce_order_edit_status', [$this, 'on_order_status_change'], 10, 2);
-
         // When status got completed
         add_action('woocommerce_order_status_completed', [$this, 'on_completed'], 10, 2);
 
@@ -29,19 +25,18 @@ class WC_Order_Notify_Plugin
         add_action('woocommerce_process_shop_order_meta', [$this, 'on_order_update'], 10, 2);
 
         // When initialized
-        add_action('admin_init', [$this,'woocommerce_order_notify_settings_init']);
+        add_action('admin_init', [$this, 'woocommerce_order_notify_settings_init']);
 
         // When menu load
         add_action('admin_menu', [$this, 'woocommerce_order_notify_add_admin_menu']);
     }
 
-
-
     public function woocommerce_order_notify_add_admin_menu()
     {
-        add_options_page('Woocommerce Order Notify', 'Woocommerce Order Notify', 'manage_options', 'Woocommerce Order Notify', [$this, 'woocommerce_order_notify_options_page']);
+        add_options_page('Woocommerce Order Notify', 'Woocommerce Order Notify',
+          'manage_options', 'Woocommerce Order Notify',
+          [$this, 'woocommerce_order_notify_options_page']);
     }
-
 
     public function woocommerce_order_notify_settings_init()
     {
@@ -50,14 +45,14 @@ class WC_Order_Notify_Plugin
         add_settings_section(
             'woocommerce_order_notify_plugin_page_section',
             __('NationBuilder\'s settings', 'Woocommerce Order Notify'),
-            [$this,'woocommerce_order_notify_settings_section_callback'],
+            [$this, 'woocommerce_order_notify_settings_section_callback'],
             'plugin_page'
         );
 
         add_settings_field(
             'woocommerce_order_notify_api_key',
             __('API Key', 'Woocommerce Order Notify'),
-            [$this,'woocommerce_order_notify_api_key_render'],
+            [$this, 'woocommerce_order_notify_api_key_render'],
             'plugin_page',
             'woocommerce_order_notify_plugin_page_section'
         );
@@ -65,7 +60,7 @@ class WC_Order_Notify_Plugin
         add_settings_field(
             'woocommerce_order_notify_nation_slug',
             __('Nation slug', 'Woocommerce Order Notify'),
-            [$this,'woocommerce_order_notify_nation_slug_render'],
+            [$this, 'woocommerce_order_notify_nation_slug_render'],
             'plugin_page',
             'woocommerce_order_notify_plugin_page_section'
         );
@@ -73,94 +68,102 @@ class WC_Order_Notify_Plugin
         add_settings_field(
             'woocommerce_order_notify_tag_name',
             __('Tag name', 'Woocommerce Order Notify'),
-            [$this,'woocommerce_order_notify_tag_name_render'],
+            [$this, 'woocommerce_order_notify_tag_name_render'],
             'plugin_page',
             'woocommerce_order_notify_plugin_page_section'
         );
     }
 
-
     public function woocommerce_order_notify_api_key_render()
     {
         $options = get_option('woocommerce_order_notify_settings'); ?>
-    	<input type='text' name='woocommerce_order_notify_settings[woocommerce_order_notify_api_key]' value='<?php echo $options['woocommerce_order_notify_api_key']; ?>'>
-    	<?php
+      <input type='text'
+      name='woocommerce_order_notify_settings[woocommerce_order_notify_api_key]'
+      value='<?php echo $options['woocommerce_order_notify_api_key']; ?>'>
+      <?php
 
     }
-
 
     public function woocommerce_order_notify_nation_slug_render()
     {
         $options = get_option('woocommerce_order_notify_settings'); ?>
-    	<input type='text' name='woocommerce_order_notify_settings[woocommerce_order_notify_nation_slug]' value='<?php echo $options['woocommerce_order_notify_nation_slug']; ?>'>
-    	<?php
+      <input type='text'
+      name='woocommerce_order_notify_settings[woocommerce_order_notify_nation_slug]'
+      value='<?php echo $options['woocommerce_order_notify_nation_slug']; ?>'>
+      <?php
 
     }
 
     public function woocommerce_order_notify_tag_name_render()
     {
         $options = get_option('woocommerce_order_notify_settings'); ?>
-    	<input type='text' name='woocommerce_order_notify_settings[woocommerce_order_notify_tag_name]' value='<?php echo $options['woocommerce_order_notify_tag_name']; ?>'>
-    	<?php
+      <input type='text'
+      name='woocommerce_order_notify_settings[woocommerce_order_notify_tag_name]'
+      value='<?php echo $options['woocommerce_order_notify_tag_name']; ?>'>
+      <?php
 
     }
-
 
     public function woocommerce_order_notify_settings_section_callback()
     {
-        echo __('please register your NationBuilder\'s settings', 'Woocommerce Order Notify');
+        echo __('please register your NationBuilder\'s settings',
+            'Woocommerce Order Notify');
     }
-
 
     public function woocommerce_order_notify_options_page()
     {
         ?>
-    	<form action='options.php' method='post'>
+      <form action='options.php' method='post'>
 
-    		<h2>Woocommerce Order Notify</h2>
+        <h2>Woocommerce Order Notify</h2>
 
-    		<?php
+        <?php
             settings_fields('plugin_page');
         do_settings_sections('plugin_page');
         submit_button(); ?>
 
-    	</form>
-    	<?php
+      </form>
+      <?php
 
     }
     /**
-     * When order status change to completed
+     * When order status change to completed.
      *
      * @param WC_Order $order
-     *
-     * @return void
      */
     public function on_completed($order_id)
     {
         // @Todo call api
         $options = get_option('woocommerce_order_notify_settings');
-
-        error_log("voici la commande détectée d'id: " . $order_id ."\n");
         $order = wc_get_order($order_id);
-        // $person = plp.nationbuilder.com/api/v1/people/match?email=simon.florian.toulouse%40gmail.com&__proto__=&access_token=e2e9cdeb3f70012949c6e90dc69b028d739846f8dad45ceee44e4e78d22c0533
-        error_log($options['woocommerce_order_notify_nation_slug'] . ".nationbuilder.com/api/v1/people/match?email=" . $order->billing_email . "&__proto__=&access_token=" . $options['woocommerce_order_notify_api_key']);
-    }
-
-    /**
-     * When order status is changeed
-     *
-     * @param integer $id     Order ID
-     * @param string  $status New status
-     *
-     * @return void
-     */
-    public function on_order_status_change($id, $status)
-    {
-        switch ($status) {
-            case 'wc-completed':
-                $order = wc_get_order($id);
-                $this->on_completed($order);
-                break;
+        $url = 'https://'.$options['woocommerce_order_notify_nation_slug'].
+            '.nationbuilder.com/api/v1/people/match?email='.
+            urlencode($order->billing_email).'&access_token='.
+            $options['woocommerce_order_notify_api_key'];
+        $args = ['headers' => ['Accept' => 'application/json'],
+            'httpversion' => '1.1', 'user-agent' => '', ];
+        $response = wp_remote_get($url, $args);
+        $body = wp_remote_retrieve_body($response);
+        $id = json_decode($response['body'])->person->id;
+        if ($id) {
+            $url2 = 'https://'.$options['woocommerce_order_notify_nation_slug'].
+              '.nationbuilder.com/api/v1/people/'.$id.'/taggings?access_token='.
+              $options['woocommerce_order_notify_api_key'];
+            $response2 = wp_remote_request($url2, array(
+            'method' => 'PUT',
+            'httpversion' => '1.1',
+            'headers' => array(),
+            'user-agent' => '',
+            'headers' => ['content-type' => 'application/json',
+                'Accept' => 'application/json', ],
+            'body' => '
+              {
+              "tagging": {
+                "tag": "'.$options['woocommerce_order_notify_tag_name'].'"
+                }
+              }',
+            )
+          );
         }
     }
 
@@ -170,10 +173,8 @@ class WC_Order_Notify_Plugin
      * This feature is necessary because WooCommerce doesn't provide
      * a smart hook from admin panel.
      *
-     * @param integer $order_id Order ID
+     * @param int     $order_id Order ID
      * @param WP_Post $post     Posted data but not all
-     *
-     * @return void
      */
     public function on_order_update($order_id, $post)
     {
