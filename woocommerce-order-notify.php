@@ -133,62 +133,55 @@ class WC_Order_Notify_Plugin
      */
     public function on_completed($order_id)
     {
-        // @Todo call api
         $options = get_option('woocommerce_order_notify_settings');
+
         $order = wc_get_order($order_id);
+
         $url = 'https://'.$options['woocommerce_order_notify_nation_slug'].
             '.nationbuilder.com/api/v1/people/match?email='.
             urlencode($order->billing_email).'&access_token='.
             $options['woocommerce_order_notify_api_key'];
-        $args = ['headers' => ['Accept' => 'application/json'],
-            'httpversion' => '1.1', 'user-agent' => '', ];
-        $response = wp_remote_get($url, $args);
-        $body = wp_remote_retrieve_body($response);
+
+        $response = wp_remote_get($url, [
+            'headers' => ['Accept' => 'application/json'],
+            'httpversion' => '1.1',
+            'user-agent' => '',
+        ]);
+
+        if (json_decode($response['body'])->code === 'no_matches') {
+            $url = 'https://'.$options['woocommerce_order_notify_nation_slug'].
+                '.nationbuilder.com/api/v1/people?access_token='.
+                $options['woocommerce_order_notify_api_key'];
+
+            $response = wp_remote_post( $url, [
+                'headers' => [
+                    'Accept' => 'application/json',
+                    'Content-type' => 'application/json'
+                ],
+                'httpversion' => '1.1',
+                'user-agent' => '',
+                'body' => '{"person":{"email":"'.$order->billing_email.'"}}',
+            ]);
+        }
+
         $id = json_decode($response['body'])->person->id;
+
         if ($id) {
-            $url2 = 'https://'.$options['woocommerce_order_notify_nation_slug'].
+            $url = 'https://'.$options['woocommerce_order_notify_nation_slug'].
               '.nationbuilder.com/api/v1/people/'.$id.'/taggings?access_token='.
               $options['woocommerce_order_notify_api_key'];
-            $response2 = wp_remote_request($url2, array(
-            'method' => 'PUT',
-            'httpversion' => '1.1',
-            'headers' => array(),
-            'user-agent' => '',
-            'headers' => ['content-type' => 'application/json',
-                'Accept' => 'application/json', ],
-            'body' => '
-              {
-              "tagging": {
-                "tag": "'.$options['woocommerce_order_notify_tag_name'].'"
-                }
-              }',
-            )
-          );
-        }
-    }
 
-    /**
-     * This method call on_order_status_change if status have changed.
-     *
-     * This feature is necessary because WooCommerce doesn't provide
-     * a smart hook from admin panel.
-     *
-     * @param int     $order_id Order ID
-     * @param WP_Post $post     Posted data but not all
-     */
-    public function on_order_update($order_id, $post)
-    {
-        // The new value is inside this parameter and not in WP_Post
-        if (!isset($_POST['order_status'])) {
-            return;
+            wp_remote_request($url, [
+                'method' => 'PUT',
+                'httpversion' => '1.1',
+                'user-agent' => '',
+                'headers' => [
+                    'content-type' => 'application/json',
+                    'Accept' => 'application/json'
+                ],
+                'body' => '{"tagging":{"tag": "'.$options['woocommerce_order_notify_tag_name'].'"}}',
+            ]);
         }
-
-        // Don't need to continue if it's the same status
-        if (0 === strcmp($post->post_status, $_POST['order_status'])) {
-            return;
-        }
-
-        $this->on_order_status_change($order_id, $_POST['order_status']);
     }
 }
 
