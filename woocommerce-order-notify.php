@@ -46,7 +46,7 @@ class WC_Order_Notify_Plugin
             'woocommerce_order_notify_plugin_page_section',
             __('NationBuilder\'s settings', 'Woocommerce Order Notify'),
             [$this, 'woocommerce_order_notify_settings_section_callback'],
-            'plugin_page'
+            'woocommerce_order_notify_settings_page'
         );
 
         add_settings_field(
