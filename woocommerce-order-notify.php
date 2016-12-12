@@ -40,20 +40,20 @@ class WC_Order_Notify_Plugin
 
     public function woocommerce_order_notify_settings_init()
     {
-        register_setting('plugin_page', 'woocommerce_order_notify_settings');
+        register_setting('woocommerce_order_notify_settings_page', 'woocommerce_order_notify_settings');
 
         add_settings_section(
             'woocommerce_order_notify_plugin_page_section',
             __('NationBuilder\'s settings', 'Woocommerce Order Notify'),
             [$this, 'woocommerce_order_notify_settings_section_callback'],
-            'plugin_page'
+            'woocommerce_order_notify_settings_page'
         );
 
         add_settings_field(
             'woocommerce_order_notify_api_key',
             __('API Key', 'Woocommerce Order Notify'),
             [$this, 'woocommerce_order_notify_api_key_render'],
-            'plugin_page',
+            'woocommerce_order_notify_settings_page',
             'woocommerce_order_notify_plugin_page_section'
         );
 
@@ -61,7 +61,7 @@ class WC_Order_Notify_Plugin
             'woocommerce_order_notify_nation_slug',
             __('Nation slug', 'Woocommerce Order Notify'),
             [$this, 'woocommerce_order_notify_nation_slug_render'],
-            'plugin_page',
+            'woocommerce_order_notify_settings_page',
             'woocommerce_order_notify_plugin_page_section'
         );
 
@@ -69,7 +69,7 @@ class WC_Order_Notify_Plugin
             'woocommerce_order_notify_tag_name',
             __('Tag name', 'Woocommerce Order Notify'),
             [$this, 'woocommerce_order_notify_tag_name_render'],
-            'plugin_page',
+            'woocommerce_order_notify_settings_page',
             'woocommerce_order_notify_plugin_page_section'
         );
     }
@@ -118,9 +118,10 @@ class WC_Order_Notify_Plugin
         <h2>Woocommerce Order Notify</h2>
 
         <?php
-            settings_fields('plugin_page');
-        do_settings_sections('plugin_page');
-        submit_button(); ?>
+          settings_fields('woocommerce_order_notify_settings_page');
+          do_settings_sections('woocommerce_order_notify_settings_page');
+          submit_button();
+        ?>
 
       </form>
       <?php
@@ -147,7 +148,10 @@ class WC_Order_Notify_Plugin
             'httpversion' => '1.1',
             'user-agent' => '',
         ]);
-
+        if (is_wp_error($response)) {
+          error_log($response->get_error_message());
+          return ;
+        }
         if (json_decode($response['body'])->code === 'no_matches') {
             $url = 'https://'.$options['woocommerce_order_notify_nation_slug'].
                 '.nationbuilder.com/api/v1/people?access_token='.
@@ -164,6 +168,10 @@ class WC_Order_Notify_Plugin
             ]);
         }
 
+        if (is_wp_error($response)) {
+          error_log($response->get_error_message());
+          return ;
+        }
         $id = json_decode($response['body'])->person->id;
 
         if ($id) {
