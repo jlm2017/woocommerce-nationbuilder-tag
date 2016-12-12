@@ -148,40 +148,49 @@ class WC_Order_Notify_Plugin
             'httpversion' => '1.1',
             'user-agent' => '',
         ]);
+        if (!is_wp_error($response)) {
+          if (json_decode($response['body'])->code === 'no_matches') {
+              $url = 'https://'.$options['woocommerce_order_notify_nation_slug'].
+                  '.nationbuilder.com/api/v1/people?access_token='.
+                  $options['woocommerce_order_notify_api_key'];
 
-        if (json_decode($response['body'])->code === 'no_matches') {
-            $url = 'https://'.$options['woocommerce_order_notify_nation_slug'].
-                '.nationbuilder.com/api/v1/people?access_token='.
-                $options['woocommerce_order_notify_api_key'];
+              $response = wp_remote_post( $url, [
+                  'headers' => [
+                      'Accept' => 'application/json',
+                      'Content-type' => 'application/json'
+                  ],
+                  'httpversion' => '1.1',
+                  'user-agent' => '',
+                  'body' => '{"person":{"email":"'.$order->billing_email.'"}}',
+              ]);
+          }
 
-            $response = wp_remote_post( $url, [
-                'headers' => [
-                    'Accept' => 'application/json',
-                    'Content-type' => 'application/json'
-                ],
-                'httpversion' => '1.1',
-                'user-agent' => '',
-                'body' => '{"person":{"email":"'.$order->billing_email.'"}}',
-            ]);
+          if (!is_wp_error($response)) {
+            $id = json_decode($response['body'])->person->id;
+
+            if ($id) {
+                $url = 'https://'.$options['woocommerce_order_notify_nation_slug'].
+                  '.nationbuilder.com/api/v1/people/'.$id.'/taggings?access_token='.
+                  $options['woocommerce_order_notify_api_key'];
+
+                wp_remote_request($url, [
+                    'method' => 'PUT',
+                    'httpversion' => '1.1',
+                    'user-agent' => '',
+                    'headers' => [
+                        'content-type' => 'application/json',
+                        'Accept' => 'application/json'
+                    ],
+                    'body' => '{"tagging":{"tag": "'.$options['woocommerce_order_notify_tag_name'].'"}}',
+                ]);
+              }
+            }
+            else {
+              error_log($response->get_error_message());
+            }
         }
-
-        $id = json_decode($response['body'])->person->id;
-
-        if ($id) {
-            $url = 'https://'.$options['woocommerce_order_notify_nation_slug'].
-              '.nationbuilder.com/api/v1/people/'.$id.'/taggings?access_token='.
-              $options['woocommerce_order_notify_api_key'];
-
-            wp_remote_request($url, [
-                'method' => 'PUT',
-                'httpversion' => '1.1',
-                'user-agent' => '',
-                'headers' => [
-                    'content-type' => 'application/json',
-                    'Accept' => 'application/json'
-                ],
-                'body' => '{"tagging":{"tag": "'.$options['woocommerce_order_notify_tag_name'].'"}}',
-            ]);
+        else {
+          error_log($response->get_error_message());
         }
     }
 }
